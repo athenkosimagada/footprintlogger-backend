@@ -7,7 +7,7 @@ import {
   deleteLog,
 } from "../controllers/logController.js";
 import { authenticate } from "../middleware/authMiddleware.js";
-import { body } from "express-validator";
+import { body, validationResult } from "express-validator";
 
 const router = express.Router();
 
