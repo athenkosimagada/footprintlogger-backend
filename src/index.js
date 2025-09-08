@@ -4,6 +4,7 @@ import { connectDB } from "./models/db.js";
 import { port } from "./config/index.js";
 
 import authRoutes from "./routes/authRoutes.js";
+import logRoutes from "./routes/logRoutes.js";
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use((err, req, res, next) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/logs", logRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err);

@@ -1,11 +1,16 @@
 import { connectDB } from "../models/db.js";
 
-export const logActivity = async (req, res) => {
+const addLog = async (req, res) => {
   try {
     const db = await connectDB();
     const logs = db.collection("logs");
-    const { userId, quantity, quantityUnit, category, carbonFootprint } =
-      req.body;
+
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const { quantity, quantityUnit, category, carbonFootprint } = req.body;
 
     const log = await logs.insertOne({
       userId,
@@ -24,11 +29,16 @@ export const logActivity = async (req, res) => {
   }
 };
 
-export const getActivityLogs = async (req, res) => {
+const getLogs = async (req, res) => {
   try {
     const db = await connectDB();
     const logs = db.collection("logs");
-    const { userId } = req.params;
+
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
     const userLogs = await logs.find({ userId }).toArray();
     res.status(200).json(userLogs);
@@ -37,3 +47,107 @@ export const getActivityLogs = async (req, res) => {
     res.status(500).send("Internal server error");
   }
 };
+
+const getLogById = async (req, res) => {
+  try {
+    const db = await connectDB();
+    const logs = db.collection("logs");
+
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const logId = req.params.id;
+    if (typeof logId !== "string") {
+      return res.status(400).json({ message: "Invalid log ID" });
+    }
+
+    const log = await logs.findOne({ _id: new ObjectId(logId), userId });
+
+    if (!log) {
+      return res.status(404).json({ message: "Log not found" });
+    }
+
+    res.status(200).json(log);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+};
+
+const updateLog = async (req, res) => {
+  try {
+    const db = await connectDB();
+    const logs = db.collection("logs");
+
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const logId = req.params.id;
+    if (typeof logId !== "string") {
+      return res.status(400).json({ message: "Invalid log ID" });
+    }
+
+    const log = await logs.findOne({ _id: new ObjectId(logId), userId });
+    if (!log) {
+      return res.status(404).json({ message: "Log not found" });
+    }
+
+    const { quantity, quantityUnit, category, carbonFootprint } = req.body;
+
+    await logs.updateOne(
+      { _id: new ObjectId(logId), userId },
+      {
+        $set: {
+          quantity,
+          quantityUnit,
+          category,
+          carbonFootprint,
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    res.status(200).json({ message: "Log updated successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+};
+
+const deleteLog = async (req, res) => {
+  try {
+    const db = await connectDB();
+    const logs = db.collection("logs");
+
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const logId = req.params.id;
+    if (typeof logId !== "string") {
+      return res.status(400).json({ message: "Invalid log ID" });
+    }
+
+    const log = await logs.findOne({ _id: new ObjectId(logId), userId });
+    if (!log) {
+      return res.status(404).json({ message: "Log not found" });
+    }
+
+    await logs.deleteOne({ _id: new ObjectId(logId), userId });
+
+    res.status(200).json({ message: "Log deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+};
+
+export { addLog, getLogs, getLogById, updateLog, deleteLog };
