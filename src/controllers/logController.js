@@ -10,10 +10,12 @@ const addLog = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const { quantity, quantityUnit, category, carbonFootprint } = req.body;
+    const { activity, quantity, quantityUnit, category, carbonFootprint } =
+      req.body;
 
     const log = await logs.insertOne({
       userId,
+      activity,
       quantity,
       quantityUnit,
       category,
@@ -98,12 +100,14 @@ const updateLog = async (req, res) => {
       return res.status(404).json({ message: "Log not found" });
     }
 
-    const { quantity, quantityUnit, category, carbonFootprint } = req.body;
+    const { activity, quantity, quantityUnit, category, carbonFootprint } =
+      req.body;
 
     await logs.updateOne(
       { _id: new ObjectId(logId), userId },
       {
         $set: {
+          activity,
           quantity,
           quantityUnit,
           category,
