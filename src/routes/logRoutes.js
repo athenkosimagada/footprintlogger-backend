@@ -21,9 +21,6 @@ router.post(
     body("quantity").isNumeric().withMessage("Quantity must be a number"),
     body("quantityUnit").notEmpty().withMessage("Quantity unit is required"),
     body("category").notEmpty().withMessage("Category is required"),
-    body("carbonFootprint")
-      .isNumeric()
-      .withMessage("Carbon footprint must be a number"),
   ],
   authenticate,
   asyncHandler(async (req, res) => {
@@ -42,9 +39,6 @@ router.put(
     body("quantity").isNumeric().withMessage("Quantity must be a number"),
     body("quantityUnit").notEmpty().withMessage("Quantity unit is required"),
     body("category").notEmpty().withMessage("Category is required"),
-    body("carbonFootprint")
-      .isNumeric()
-      .withMessage("Carbon footprint must be a number"),
   ],
   authenticate,
   asyncHandler((req, res) => {

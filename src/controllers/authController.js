@@ -28,12 +28,15 @@ const register = async (req, res) => {
     const payload = {
       user: {
         id: user.insertedId,
+        email,
+        firstName,
+        lastName,
       },
     };
 
-    const authToken = jwt.sign(payload, jwtSecret);
+    const token = jwt.sign(payload, jwtSecret);
     console.log("User registered successfully");
-    res.status(201).json({ authToken, email });
+    res.status(201).json({ token, user: payload.user });
   } catch (error) {
     console.error(error);
     return res.status(500).send("Internal server error");
@@ -56,15 +59,15 @@ const login = async (req, res) => {
     const payload = {
       user: {
         id: user._id.toString(),
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
       },
     };
 
-    const userName = user.firstName;
-    const userEmail = user.email;
-
-    const authToken = jwt.sign(payload, jwtSecret);
+    const token = jwt.sign(payload, jwtSecret);
     console.log("User logged in successfully");
-    res.status(200).json({ authToken, userName, userEmail });
+    res.status(200).json({ token, user: payload.user });
   } catch (error) {
     console.error(error);
     return res.status(500).send("Internal server error");

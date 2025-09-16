@@ -1,4 +1,5 @@
 import { connectDB } from "../models/db.js";
+import { ObjectId } from "mongodb";
 
 const getStreak = async (req, res) => {
   try {
@@ -30,7 +31,8 @@ const getStreak = async (req, res) => {
     let highestStreak = 1;
 
     for (let i = 1; i < uniqueLogDates.length; i++) {
-      const diff = (dates[i - 1] - dates[i]) / (1000 * 60 * 60 * 24);
+      const diff =
+        (uniqueLogDates[i - 1] - uniqueLogDates[i]) / (1000 * 60 * 60 * 24);
 
       if (diff === 1) currentStreak++;
       else currentStreak = 1;
@@ -92,15 +94,22 @@ const getCommunityAverage = async (req, res) => {
       .aggregate([
         {
           $group: {
-            _id: "$category",
+            _id: null,
             averageCarbonFootprint: { $avg: "$carbonFootprint" },
             averageQuantity: { $avg: "$quantity" },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            averageCarbonFootprint: 1,
+            averageQuantity: 1,
           },
         },
       ])
       .toArray();
 
-    res.status(200).json(communityAverage);
+    res.status(200).json(communityAverage[0] || {});
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal server error");
@@ -111,6 +120,7 @@ const getTopContributors = async (req, res) => {
   try {
     const db = await connectDB();
     const logs = db.collection("logs");
+    const users = db.collection("users");
 
     const userId = req.user?.id;
     if (!userId) {
@@ -123,6 +133,26 @@ const getTopContributors = async (req, res) => {
           $group: {
             _id: "$userId",
             totalCarbonFootprint: { $sum: "$carbonFootprint" },
+          },
+        },
+        {
+          $addFields: { userObjectId: { $toObjectId: "$_id" } },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "userObjectId",
+            foreignField: "_id",
+            as: "user",
+          },
+        },
+        { $unwind: "$user" },
+        {
+          $project: {
+            _id: 0,
+            firstName: "$user.firstName",
+            lastName: "$user.lastName",
+            totalCarbonFootprint: 1,
           },
         },
         { $sort: { totalCarbonFootprint: -1 } },
