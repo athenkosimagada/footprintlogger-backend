@@ -24,7 +24,6 @@ router.post(
     body("category")
       .notEmpty()
       .withMessage("Category is required (e.g., food, travel, energy)"),
-    validateRequest,
   ],
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
@@ -35,3 +34,5 @@ router.post(
   })
 );
 router.get("/weekly-goal", authenticate, asyncHandler(getWeeklyGoal));
+
+export default router;
