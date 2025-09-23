@@ -155,8 +155,8 @@ const getTopContributors = async (req, res) => {
             totalCarbonFootprint: 1,
           },
         },
-        { $sort: { totalCarbonFootprint: -1 } },
-        { $limit: 5 },
+        { $sort: { totalCarbonFootprint: 1 } },
+        { $limit: 10 },
       ])
       .toArray();
 

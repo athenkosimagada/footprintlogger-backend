@@ -17,12 +17,12 @@ const asyncHandler = (fn) => (req, res, next) => {
 
 router.post(
   "/",
+  authenticate,
   [
     body("quantity").isNumeric().withMessage("Quantity must be a number"),
     body("quantityUnit").notEmpty().withMessage("Quantity unit is required"),
     body("category").notEmpty().withMessage("Category is required"),
   ],
-  authenticate,
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -35,12 +35,12 @@ router.get("/", authenticate, asyncHandler(getLogs));
 router.get("/:id", authenticate, asyncHandler(getLogById));
 router.put(
   "/:id",
+  authenticate,
   [
     body("quantity").isNumeric().withMessage("Quantity must be a number"),
     body("quantityUnit").notEmpty().withMessage("Quantity unit is required"),
     body("category").notEmpty().withMessage("Category is required"),
   ],
-  authenticate,
   asyncHandler((req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
