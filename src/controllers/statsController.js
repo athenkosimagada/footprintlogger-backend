@@ -150,6 +150,7 @@ const getTopContributors = async (req, res) => {
         {
           $project: {
             _id: 0,
+            userId: "$_id",
             firstName: "$user.firstName",
             lastName: "$user.lastName",
             totalCarbonFootprint: 1,

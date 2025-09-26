@@ -43,7 +43,14 @@ const getLogs = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const userLogs = await logs.find({ userId }).toArray();
+    const query = { userId };
+
+    const { category } = req.query;
+    if (category && category !== "all") {
+      query.category = category;
+    }
+
+    const userLogs = await logs.find(query).toArray();
     res.status(200).json(userLogs);
   } catch (error) {
     console.error(error);

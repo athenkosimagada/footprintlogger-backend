@@ -28,7 +28,7 @@ const getLatestTip = async (req, res) => {
 
     const tip = generateTip(highestCategory, categoryTotals[highestCategory]);
 
-    res.status(200).json({ tip, category: highestCategory });
+    res.status(200).json({ tip });
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal server error");
