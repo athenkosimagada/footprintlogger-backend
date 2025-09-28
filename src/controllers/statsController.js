@@ -31,8 +31,10 @@ const getStreak = async (req, res) => {
     let highestStreak = 1;
 
     for (let i = 1; i < uniqueLogDates.length; i++) {
-      const diff =
-        (uniqueLogDates[i - 1] - uniqueLogDates[i]) / (1000 * 60 * 60 * 24);
+      const prevDate = new Date(uniqueLogDates[i - 1]._id);
+      const currDate = new Date(uniqueLogDates[i]._id);
+
+      const diff = (prevDate - currDate) / (1000 * 60 * 60 * 24);
 
       if (diff === 1) currentStreak++;
       else currentStreak = 1;
@@ -62,12 +64,14 @@ const getWeeklySummary = async (req, res) => {
 
     const summary = await logs
       .aggregate([
-        { $match: { userId, date: { $gte: oneWeekAgo } } },
+        { $match: { userId, createdAt: { $gte: oneWeekAgo } } },
         {
           $group: {
             _id: "$category",
-            totalCarbonFootprint: { $sum: "$carbonFootprint" },
-            totalQuantity: { $sum: "$quantity" },
+            totalCarbonFootprint: {
+              $sum: { $ifNull: ["$carbonFootprint", 0] },
+            },
+            totalQuantity: { $sum: { $ifNull: ["$quantity", 0] } },
           },
         },
       ])
@@ -95,8 +99,10 @@ const getCommunityAverage = async (req, res) => {
         {
           $group: {
             _id: null,
-            averageCarbonFootprint: { $avg: "$carbonFootprint" },
-            averageQuantity: { $avg: "$quantity" },
+            averageCarbonFootprint: {
+              $avg: { $ifNull: ["$carbonFootprint", 0] },
+            },
+            averageQuantity: { $avg: { $ifNull: ["$quantity", 0] } },
           },
         },
         {
@@ -132,7 +138,9 @@ const getTopContributors = async (req, res) => {
         {
           $group: {
             _id: "$userId",
-            totalCarbonFootprint: { $sum: "$carbonFootprint" },
+            totalCarbonFootprint: {
+              $sum: { $ifNull: ["$carbonFootprint", 0] },
+            },
           },
         },
         {
